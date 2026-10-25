@@ -28,7 +28,7 @@ function start() {
   if (!attribution) { attribution = {source:sourceFrom(document.referrer,location.search),campaign:campaignFrom(location.search)}; try { sessionStorage.setItem('bering.analytics.attribution',JSON.stringify(attribution)); } catch {} }
   if (!pageTracked) { pageTracked = true; track('page_view'); }
   observer = new IntersectionObserver(entries => entries.forEach(entry => {
-    const id = entry.target.id; if (entry.isIntersecting && !seen.has(id)) { seen.add(id); track('section_view', { section: id }); }
+    const id = entry.target.id; if (!['inicio','evento','boxes','cumple','visitanos'].includes(id)) return; if (entry.isIntersecting && !seen.has(id)) { seen.add(id); track('section_view', { section: id }); }
   }), { threshold: 0.2 });
   document.querySelectorAll('main section[id]').forEach(section => observer.observe(section));
 }

@@ -112,3 +112,16 @@ if(config.demo){
 }else initAnalytics();
 refreshAvailability();
 if(location.pathname.includes('/cumple'))requestAnimationFrame(()=>$('#cumple').scrollIntoView());
+
+// El visitante abre el chat y decide si envía el mensaje. No se envía desde la web.
+for (const link of document.querySelectorAll('[data-whatsapp]')) {
+  if (!/^519\d{8}$/.test(config.whatsapp)) { link.hidden = true; continue; }
+  const subject = link.dataset.whatsapp;
+  const texts = {
+    viernes: 'Hola, vi Viernes Chelero en la web de Bering Bou: 2 Pilsen por S/15 hasta medianoche. Quiero consultar las condiciones para este viernes.',
+    cumple: 'Hola, vi los cumpleaños en la web de Bering Bou. Quiero celebrar el [fecha] con [cantidad] personas. ¿Qué beneficios y condiciones aplican?',
+    evento: 'Hola, vi Halloween con El Chombo en la web de Bering Bou. Quiero consultar entradas y boxes para el 31 de octubre.'
+  };
+  link.href = 'https://wa.me/' + config.whatsapp + '?text=' + encodeURIComponent(texts[subject]);
+  link.addEventListener('click', () => track('whatsapp_click', {section: subject === 'viernes' ? null : subject}));
+}
