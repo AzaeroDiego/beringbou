@@ -1,0 +1,10 @@
+-- Ejecutar en SQL Editor solo después de elegir la cuenta de administración.
+-- Copiar el UID de la cuenta propia desde Authentication > Users.
+-- No usar correo, contraseña ni la clave service_role en el frontend.
+-- Sustituir el marcador por el UUID exacto antes de ejecutar:
+-- insert into bering_private.admins(user_id)
+-- values ('UUID_DE_TU_CUENTA'::uuid)
+-- on conflict do nothing;
+--
+-- Después, iniciar sesión en /admin/ con el correo y la contraseña de esa
+-- cuenta de Supabase Auth. La cuenta del dashboard de Supabase es distinta.
