@@ -3,10 +3,11 @@
 const tool={name:"get_brand_context",description:"Devuelve información editorial pública de Bering Bou para preparar borradores; no programa ni publica.",annotations:{readOnlyHint:true,destructiveHint:false,openWorldHint:false},inputSchema:{type:"object",properties:{},additionalProperties:false}};
 const templateTool={name:"get_campaign_template",description:"Obtiene una plantilla editorial pública para crear una campaña con IA; no consulta datos privados ni publica.",annotations:{readOnlyHint:true,destructiveHint:false,openWorldHint:false},inputSchema:{type:"object",properties:{campaign:{type:"string",enum:["viernes_chelero","cumpleanos","evento_general"]}},required:["campaign"],additionalProperties:false}};
 const draftTestTool={name:"create_test_draft",description:"PRUEBA DE ESCRITURA SIMULADA: construye un borrador ficticio en memoria y lo devuelve. No guarda archivos, no modifica Supabase y no publica.",annotations:{readOnlyHint:false,destructiveHint:false,openWorldHint:false,idempotentHint:true},inputSchema:{type:"object",properties:{title:{type:"string",maxLength:100},test_marker:{type:"string",maxLength:80}},required:["title","test_marker"],additionalProperties:false}};
+const savedDraftTool={name:"create_campaign_draft",description:"Guarda un borrador real en Supabase SOLO con autorización de administrador; nunca publica. Requiere Bearer JWT de sesión Supabase, verificado por Supabase Auth.",annotations:{readOnlyHint:false,destructiveHint:false,openWorldHint:false},inputSchema:{type:"object",properties:{title:{type:"string",maxLength:120},brief:{type:"string",maxLength:2000},test_marker:{type:"string",maxLength:80}},required:["title"],additionalProperties:false}};
 const ok=(id,result)=>({jsonrpc:"2.0",id,result});
 const err=(id,code,message)=>({jsonrpc:"2.0",id,error:{code,message}});
 function response(obj,status=200){return new Response(JSON.stringify(obj),{status,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store","access-control-allow-origin":"*","access-control-allow-headers":"content-type,accept,mcp-protocol-version,mcp-session-id","access-control-allow-methods":"POST,GET,OPTIONS"}})}
-export default {async fetch(request){
+export default {async fetch(request,env){
  const url=new URL(request.url);
  if(url.pathname==="/")return response({service:"Bering Bou MCP",endpoint:"/mcp",mode:"read-only connectivity test"});
  if(url.pathname!=="/mcp")return response({error:"Not found"},404);
@@ -19,8 +20,23 @@ export default {async fetch(request){
  const id=p.id;
  if(p.method==="initialize")return response(ok(id,{protocolVersion:"2025-06-18",capabilities:{tools:{listChanged:false}},serverInfo:{name:"beringbou-mcp",version:"0.1.0"}}));
  if(p.method==="ping")return response(ok(id,{}));
- if(p.method==="tools/list")return response(ok(id,{tools:[tool,templateTool,draftTestTool]}));
+ if(p.method==="tools/list")return response(ok(id,{tools:[tool,templateTool,draftTestTool,savedDraftTool]}));
  if(p.method==="tools/call"){
+  if(p.params?.name==="create_campaign_draft"){
+   const token=(request.headers.get("authorization")||"").match(/^Bearer\\s+([^\\s]+)$/i)?.[1];
+   if(!token)return response(err(id,-32001,"Authentication required: Supabase user session bearer token"),401);
+   if(!env?.SUPABASE_PUBLISHABLE_KEY)return response(err(id,-32000,"Server not configured for authenticated writes"),503);
+   const args=p.params?.arguments||{};
+   if(typeof args.title!=="string"||!args.title.trim()||args.title.length>120||typeof(args.brief??"")!=="string"||(args.brief??"").length>2000||typeof(args.test_marker??"")!=="string"||(args.test_marker??"").length>80)return response(err(id,-32602,"Invalid campaign arguments"));
+   const base="https://gowitycgqmywvtxzdrdu.supabase.co";
+   const headers={"apikey":env.SUPABASE_PUBLISHABLE_KEY,"authorization":"Bearer "+token};
+   const identity=await fetch(base+"/auth/v1/user",{headers});
+   if(!identity.ok)return response(err(id,-32001,"Invalid or expired Supabase session"),401);
+   const save=await fetch(base+"/rest/v1/rpc/bering_create_campaign_draft",{method:"POST",headers:{...headers,"content-type":"application/json"},body:JSON.stringify({p_title:args.title,p_brief:args.brief??"",p_marker:args.test_marker??""})});
+   if(!save.ok)return response(err(id,-32003,save.status===403?"Administrator access required":"Draft save rejected"),save.status===403?403:400);
+   const campaignId=await save.json();
+   return response(ok(id,{content:[{type:"text",text:JSON.stringify({id:campaignId,status:"draft",persisted:true,published:false})}],isError:false}));
+  }
   if(p.params?.name==="create_test_draft"){
    const a=p.params?.arguments??{};
    if(typeof a.title!=="string"||typeof a.test_marker!=="string"||!a.title.trim()||!a.test_marker.trim()||a.title.length>100||a.test_marker.length>80)return response(err(id,-32602,"Invalid test arguments"));
