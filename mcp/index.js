@@ -2,6 +2,7 @@
 // Streamable HTTP, JSON-RPC 2.0. OAuth obligatorio antes de agregar herramientas privadas.
 const tool={name:"get_brand_context",description:"Devuelve información editorial pública de Bering Bou para preparar borradores; no programa ni publica.",annotations:{readOnlyHint:true,destructiveHint:false,openWorldHint:false},inputSchema:{type:"object",properties:{},additionalProperties:false}};
 const templateTool={name:"get_campaign_template",description:"Obtiene una plantilla editorial pública para crear una campaña con IA; no consulta datos privados ni publica.",annotations:{readOnlyHint:true,destructiveHint:false,openWorldHint:false},inputSchema:{type:"object",properties:{campaign:{type:"string",enum:["viernes_chelero","cumpleanos","evento_general"]}},required:["campaign"],additionalProperties:false}};
+const draftTestTool={name:"create_test_draft",description:"PRUEBA DE ESCRITURA SIMULADA: construye un borrador ficticio en memoria y lo devuelve. No guarda archivos, no modifica Supabase y no publica.",annotations:{readOnlyHint:false,destructiveHint:false,openWorldHint:false,idempotentHint:true},inputSchema:{type:"object",properties:{title:{type:"string",maxLength:100},test_marker:{type:"string",maxLength:80}},required:["title","test_marker"],additionalProperties:false}};
 const ok=(id,result)=>({jsonrpc:"2.0",id,result});
 const err=(id,code,message)=>({jsonrpc:"2.0",id,error:{code,message}});
 function response(obj,status=200){return new Response(JSON.stringify(obj),{status,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store","access-control-allow-origin":"*","access-control-allow-headers":"content-type,accept,mcp-protocol-version,mcp-session-id","access-control-allow-methods":"POST,GET,OPTIONS"}})}
@@ -18,8 +19,14 @@ export default {async fetch(request){
  const id=p.id;
  if(p.method==="initialize")return response(ok(id,{protocolVersion:"2025-06-18",capabilities:{tools:{listChanged:false}},serverInfo:{name:"beringbou-mcp",version:"0.1.0"}}));
  if(p.method==="ping")return response(ok(id,{}));
- if(p.method==="tools/list")return response(ok(id,{tools:[tool,templateTool]}));
+ if(p.method==="tools/list")return response(ok(id,{tools:[tool,templateTool,draftTestTool]}));
  if(p.method==="tools/call"){
+  if(p.params?.name==="create_test_draft"){
+   const a=p.params?.arguments??{};
+   if(typeof a.title!=="string"||typeof a.test_marker!=="string"||!a.title.trim()||!a.test_marker.trim()||a.title.length>100||a.test_marker.length>80)return response(err(id,-32602,"Invalid test arguments"));
+   const result={title:a.title,test_marker:a.test_marker,status:"SIMULATED_ONLY",persisted:false,published:false,warning:"No changes to database, files or social networks. This probes availability of a tool declared as non-read-only."};
+   return response(ok(id,{content:[{type:"text",text:JSON.stringify(result)}],isError:false}));
+  }
   if(p.params?.name==="get_campaign_template"){
    const key=p.params?.arguments?.campaign;
    const templates={
