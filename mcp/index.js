@@ -1,3 +1,7 @@
+const resourceUrl="https://beringbou-mcp-test.x202222552.workers.dev/mcp";
+const issuerUrl="https://gowitycgqmywvtxzdrdu.supabase.co/auth/v1";
+const resourceMetadata={resource:resourceUrl,authorization_servers:[issuerUrl],bearer_methods_supported:["header"]};
+const authChallenge='Bearer resource_metadata="https://beringbou-mcp-test.x202222552.workers.dev/.well-known/oauth-protected-resource"';
 // Bering Bou MCP: prueba de conectividad sin datos privados ni acciones de escritura.
 // Streamable HTTP, JSON-RPC 2.0. OAuth obligatorio antes de agregar herramientas privadas.
 const tool={name:"get_brand_context",description:"Devuelve información editorial pública de Bering Bou para preparar borradores; no programa ni publica.",annotations:{readOnlyHint:true,destructiveHint:false,openWorldHint:false},inputSchema:{type:"object",properties:{},additionalProperties:false}};
@@ -9,6 +13,7 @@ const err=(id,code,message)=>({jsonrpc:"2.0",id,error:{code,message}});
 function response(obj,status=200){return new Response(JSON.stringify(obj),{status,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store","access-control-allow-origin":"*","access-control-allow-headers":"content-type,accept,mcp-protocol-version,mcp-session-id","access-control-allow-methods":"POST,GET,OPTIONS"}})}
 export default {async fetch(request,env){
  const url=new URL(request.url);
+ if(url.pathname==="/.well-known/oauth-protected-resource"||url.pathname==="/.well-known/oauth-protected-resource/mcp")return response(resourceMetadata);
  if(url.pathname==="/")return response({service:"Bering Bou MCP",endpoint:"/mcp",mode:"read-only connectivity test"});
  if(url.pathname!=="/mcp")return response({error:"Not found"},404);
  if(request.method==="OPTIONS")return new Response(null,{status:204,headers:{"access-control-allow-origin":"*","access-control-allow-methods":"POST,GET,OPTIONS","access-control-allow-headers":"content-type,accept,mcp-protocol-version,mcp-session-id"}});
@@ -24,7 +29,7 @@ export default {async fetch(request,env){
  if(p.method==="tools/call"){
   if(p.params?.name==="create_campaign_draft"){
    const token=(request.headers.get("authorization")||"").match(/^Bearer\\s+([^\\s]+)$/i)?.[1];
-   if(!token)return response(err(id,-32001,"Authentication required: Supabase user session bearer token"),401);
+   if(!token){const rejected=response(err(id,-32001,"OAuth sign-in required"),401);rejected.headers.set("WWW-Authenticate",authChallenge);return rejected;}
    if(!env?.SUPABASE_PUBLISHABLE_KEY)return response(err(id,-32000,"Server not configured for authenticated writes"),503);
    const args=p.params?.arguments||{};
    if(typeof args.title!=="string"||!args.title.trim()||args.title.length>120||typeof(args.brief??"")!=="string"||(args.brief??"").length>2000||typeof(args.test_marker??"")!=="string"||(args.test_marker??"").length>80)return response(err(id,-32602,"Invalid campaign arguments"));
