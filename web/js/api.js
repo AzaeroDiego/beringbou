@@ -49,3 +49,13 @@ export async function signOut() {
   try { if (session?.access_token) await request('/auth/v1/logout', { token: session.access_token }); }
   finally { saveSession(null); }
 }
+
+/** Operaciones editoriales autenticadas; reutilizan el refresco de sesión de rpc(). */
+export async function adminRest(method, path, body) {
+  if (!session?.access_token) throw new Error('Inicia sesión para continuar.');
+  if (session.expires_at < Date.now()/1000 + 60) {
+    const result=await request('/auth/v1/token?grant_type=refresh_token',{body:{refresh_token:session.refresh_token}});
+    saveSession({...result,expires_at:Date.now()/1000+result.expires_in});
+  }
+  return request('/rest/v1/'+path,{method,body,token:session.access_token});
+}
