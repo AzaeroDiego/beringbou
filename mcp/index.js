@@ -28,7 +28,7 @@ export default {async fetch(request,env){
  if(p.method==="tools/list")return response(ok(id,{tools:[tool,templateTool,draftTestTool,savedDraftTool]}));
  if(p.method==="tools/call"){
   if(p.params?.name==="create_campaign_draft"){
-   const token=(request.headers.get("authorization")||"").match(/^Bearer\\s+([^\\s]+)$/i)?.[1];
+   const token=(request.headers.get("authorization")||"").match(/^Bearer\s+([^\s]+)$/i)?.[1];
    if(!token){const rejected=response(err(id,-32001,"OAuth sign-in required"),401);rejected.headers.set("WWW-Authenticate",authChallenge);return rejected;}
    if(!env?.SUPABASE_PUBLISHABLE_KEY)return response(err(id,-32000,"Server not configured for authenticated writes"),503);
    const args=p.params?.arguments||{};
