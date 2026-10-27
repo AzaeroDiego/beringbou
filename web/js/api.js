@@ -59,3 +59,25 @@ export async function adminRest(method, path, body) {
   }
   return request('/rest/v1/'+path,{method,body,token:session.access_token});
 }
+
+/** Protected media upload; does not expose service keys. */
+export async function uploadMedia(file) {
+  if (!configured || !session?.access_token) throw new Error('Inicia sesión.');
+  if (session.expires_at < Date.now()/1000+60) {
+    const result=await request('/auth/v1/token?grant_type=refresh_token',{body:{refresh_token:session.refresh_token}});
+    saveSession({...result,expires_at:Date.now()/1000+result.expires_in});
+  }
+  const allowed=['image/jpeg','image/png','image/webp','image/gif','video/mp4'];
+  if(!allowed.includes(file.type) || file.size>10*1024*1024) throw new Error('Se admiten JPG, PNG, WEBP, GIF o MP4 hasta 10 MB.');
+  const extension=({ 'image/jpeg':'jpg','image/png':'png','image/webp':'webp','image/gif':'gif','video/mp4':'mp4'})[file.type];
+  const path=crypto.randomUUID()+'.'+extension;
+  const url=config.supabaseUrl.replace(/\/$/,'')+'/storage/v1/object/beringbou-media/'+path;
+  const response=await fetch(url,{method:'POST',headers:{apikey:config.supabasePublishableKey,Authorization:'Bearer '+session.access_token,'Content-Type':file.type,'x-upsert':'false'},body:file});
+  if(!response.ok) throw new Error('No se pudo cargar el archivo ('+response.status+').');
+  return path;
+}
+export async function mediaSignedUrl(path) {
+  if (!session?.access_token) throw new Error('Sesión requerida.');
+  const response=await request('/storage/v1/object/sign/beringbou-media/'+encodeURIComponent(path),{body:{expiresIn:120},token:session.access_token});
+  return config.supabaseUrl.replace(/\/$/,'')+response.signedURL;
+}
