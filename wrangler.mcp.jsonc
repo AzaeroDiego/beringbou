@@ -1,1 +1,8 @@
-{"name":"beringbou-mcp-test","main":"mcp/index.js","compatibility_date":"2026-10-23"}
+{
+  "name": "beringbou-mcp-test",
+  "main": "mcp/index.js",
+  "compatibility_date": "2026-10-23",
+  "vars": {
+    "SUPABASE_PUBLISHABLE_KEY": "sb_publishable_IyMjiDWoOVdjiwjwTNDIJA_4kB5JfK2"
+  }
+}
