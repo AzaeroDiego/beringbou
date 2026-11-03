@@ -2,6 +2,14 @@
 
 Repositorio público limpio de la nueva web; no contiene archivos ni historial del sistema antiguo. Diseño adaptado al video de Diego: fondo navy, cian/fucsia, botones amarillos redondeados, portada inmersiva, cuenta regresiva y reserva en tres pasos. Incluye el evento real del flyer, plano de diez boxes y sección de cumpleaños.
 
+## Etapa 1 · programación permanente (3 de noviembre de 2026)
+
+Portada de marca sin cuenta regresiva vencida; agenda de viernes y sábado con fechas en hora de Lima, flyer de Viernes Chelero y programación del sábado por anunciar. Cumpleaños conserva su promoción independiente. Halloween se conserva solo como recuerdo desplegable y sus tarifas no se ofrecen para nuevas fechas.
+
+El plano de diez boxes permite elegir fecha y preparar una consulta por WhatsApp con el box seleccionado. `boxInquiryOnly: true` evita consultar disponibilidad o enviar solicitudes contra el evento histórico de Halloween. Los precios y contenidos de los nuevos paquetes se confirman con el negocio; no se publican rebajas inventadas. La configuración histórica permanece para compatibilidad con los registros existentes.
+
+GitHub Pages continúa como demostración sin formularios reales ni analítica; los enlaces de WhatsApp abren una consulta que el visitante decide enviar. QR, cuentas de clientes, puntos y panel editorial corresponden a etapas posteriores.
+
 ## Ejecutar y compilar
 
 Requiere Node 20 o superior. Sin dependencias de npm.

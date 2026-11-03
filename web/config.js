@@ -1,6 +1,7 @@
 // Solo URL y clave PUBLICABLE (o anon). Nunca service_role ni claves sb_secret_.
 export const config = Object.freeze({
   demo: false,
+  boxInquiryOnly: true, // Tarifas nuevas por definir; consultar por fecha, sin usar el evento vencido.
   supabaseUrl: 'https://gowitycgqmywvtxzdrdu.supabase.co',
   supabasePublishableKey: 'sb_publishable_IyMjiDWoOVdjiwjwTNDIJA_4kB5JfK2',
   whatsapp: '51930776652', // Número comercial publicado en el flyer.

@@ -17,6 +17,12 @@ function selectBox(id) {
   selected=id; const pkg=config.event.packages[boxType(id)];
   $('#box-position').textContent=positions[id]; $('#box-label').replaceChildren(document.createTextNode('BOX '));
   const em=document.createElement('em');em.textContent=String(id).padStart(2,'0');$('#box-label').append(em);
+  if(config.boxInquiryOnly){
+    $('#package-name').textContent='ZONA '+boxType(id).toUpperCase();
+    $('#package-price').textContent='Por consultar';
+    document.querySelectorAll('[data-box]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.box)===selected)));
+    updateBoxInquiry();return;
+  }
   $('#package-name').textContent=pkg.name.toUpperCase();$('#package-price').textContent=money(pkg.price);
   $('#package-includes').replaceChildren(...['1 botella '+pkg.bottle,'2 guaranás','Hielo ilimitado','4 pulseras VIP'].map(text=>{const li=document.createElement('li');li.textContent=text;return li;}));
   document.querySelectorAll('[data-box]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.box)===selected)));
@@ -27,6 +33,7 @@ function selectBox(id) {
   $('#box-notice').textContent=taken?'Este box ya tiene una reserva confirmada. Elige otro.':(config.demo?'Demostración interactiva: no envía datos ni separa espacios.':!configured?'Conectando próximamente las solicitudes. Puedes explorar los paquetes.':availabilityError?'No pudimos verificar disponibilidad. Pulsa Actualizar para reintentar.':!open?'El evento no acepta solicitudes en este momento.':'Tu solicitud será atendida antes de confirmar la reserva.');
 }
 async function refreshAvailability() {
+  if(config.boxInquiryOnly){selectBox(selected);return;}
   const status=$('#availability-status');availabilityError=false;$('#refresh-boxes').disabled=true;$('#request-box').disabled=true;
   status.textContent='Consultando disponibilidad…';
   try {
@@ -56,19 +63,39 @@ function renderBookingOptions() {
   $('#booking-next').disabled=!eventOpenByDate||!availability?.active||availabilityError||availability?.taken?.includes(selected);
 }
 function openBooking() {
+  if(config.boxInquiryOnly){$('#boxes').scrollIntoView({behavior:'smooth'});$('#box-date').focus({preventScroll:true});return;}
   renderBookingOptions();setBookingStep(1);$('#box-form-title').textContent='Reserva tu box';$('#box-form .form-message').textContent='';$('#box-dialog').showModal();
 }
-$('#request-box').addEventListener('click',openBooking);
-$('#hero-book').addEventListener('click',openBooking);
-$('#event-book').addEventListener('click',openBooking);
+if(!config.boxInquiryOnly)$('#request-box').addEventListener('click',openBooking);
+$('#hero-book')?.addEventListener('click',openBooking);
+$('#event-book')?.addEventListener('click',openBooking);
 $('#booking-next').addEventListener('click',()=>{
   const pkg=config.event.packages[boxType(selected)];$('#box-form-package').textContent='Box '+String(selected).padStart(2,'0')+' · '+pkg.name+' · '+money(pkg.price);setBookingStep(2);$('#box-name').focus();track('form_start',{box_id:selected,section:'boxes'});
 });
 $('#booking-back').addEventListener('click',()=>setBookingStep(1));
 $('#booking-done').addEventListener('click',()=>$('#box-dialog').close());
-const countdownTarget=new Date(config.event.date+'T00:00:00-05:00').getTime();
-function updateCountdown(){let seconds=Math.max(0,Math.floor((countdownTarget-Date.now())/1000));const values={days:Math.floor(seconds/86400),hours:Math.floor(seconds%86400/3600),minutes:Math.floor(seconds%3600/60),seconds:seconds%60};for(const [unit,value] of Object.entries(values))$('#count-'+unit).textContent=String(value).padStart(2,'0');}
-updateCountdown();setInterval(updateCountdown,1000);
+// Calendario local: conserva viernes/sábado visibles sin anunciar un artista no confirmado.
+function nextWeekday(day) {
+  const date=new Date(limaDate()+'T12:00:00Z');
+  date.setUTCDate(date.getUTCDate()+(day-date.getUTCDay()+7)%7);
+  return date;
+}
+for(const [id,day] of [['friday-date',5],['saturday-date',6]]) {
+  const date=nextWeekday(day);
+  $('#'+id).textContent=new Intl.DateTimeFormat('es-PE',{timeZone:'America/Lima',weekday:'long',day:'2-digit',month:'short'}).format(date).toUpperCase();
+}
+const boxDate=$('#box-date');boxDate.min=limaDate();boxDate.value=limaDate(nextWeekday(5));
+function updateBoxInquiry() {
+  const link=$('#request-box');
+  const valid=boxDate.checkValidity() && boxDate.value>=limaDate() && /^519\d{8}$/.test(config.whatsapp);
+  link.setAttribute('aria-disabled',String(!valid));
+  if(!valid){link.removeAttribute('href');$('#box-notice').textContent='Elige una fecha desde hoy para consultar este box.';return;}
+  const date=new Intl.DateTimeFormat('es-PE',{timeZone:'America/Lima',day:'numeric',month:'long',year:'numeric'}).format(new Date(boxDate.value+'T12:00:00Z'));
+  link.href='https://wa.me/'+config.whatsapp+'?text='+encodeURIComponent('Hola, vi los boxes en la web de Bering Bou. Quiero consultar el box '+String(selected).padStart(2,'0')+' para el '+date+'. ¿Cuál es el precio, capacidad y qué incluye el paquete?');
+  $('#box-notice').textContent='Consulta para el '+date+'. No separa el box; el local debe confirmar disponibilidad y condiciones.';
+}
+boxDate.addEventListener('input',updateBoxInquiry);
+$('#request-box').addEventListener('click',event=>{if(config.boxInquiryOnly){updateBoxInquiry();if($('#request-box').getAttribute('aria-disabled')==='true')event.preventDefault();else track('whatsapp_click',{section:'boxes',box_id:selected});}});
 const dateInput=$('#birthday-date');dateInput.min=limaDate(); const maxDate=new Date(limaDate()+'T12:00:00Z');maxDate.setUTCDate(maxDate.getUTCDate()+366);dateInput.max=limaDate(maxDate);
 let birthdayStarted=false;$('#birthday-form').addEventListener('focusin',event=>{if(event.target.matches('input:not([type=checkbox])')&&!birthdayStarted){birthdayStarted=true;track('form_start',{section:'cumple'});}});
 function setupForm(form,kind) {
@@ -77,6 +104,7 @@ function setupForm(form,kind) {
     event.preventDefault();if(sending)return;const values=new FormData(form);const message=form.querySelector('.form-message');message.classList.remove('error');
     if(values.get('website'))return;
     const data={kind,name:String(values.get('name')||'').trim(),phone:String(values.get('phone')||'').trim(),date:kind==='box'?config.event.date:String(values.get('date')),guests:Number(values.get('guests')),privacy:values.get('privacy')==='on',box_id:kind==='box'?selected:null,event_slug:kind==='box'?config.event.slug:null};
+    if(kind==='box' && config.boxInquiryOnly){message.textContent='Consulta el paquete vigente por WhatsApp desde el plano de boxes.';return;}
     const invalid=validateRequest(data);if(invalid){message.textContent=invalid;message.classList.add('error');return;}
     if(config.demo){
       if(kind==='box'){$('#booking-success-code').textContent='Vista previa: no se enviaron datos ni se guardó una reserva.';$('#booking-success h3').textContent='Así se verá tu solicitud';setBookingStep(3);}
@@ -104,7 +132,7 @@ function setupForm(form,kind) {
   });
 }
 setupForm($('#birthday-form'),'birthday');setupForm($('#box-form'),'box');
-if(!eventOpenByDate)$('#event-state').textContent='Este evento ya pasó. Consulta próximas fechas y celebra tu cumpleaños con nosotros.';
+if(!eventOpenByDate && $('#event-state'))$('#event-state').textContent='Este evento ya pasó. Consulta próximas fechas y celebra tu cumpleaños con nosotros.';
 if(config.demo){
   $('#consent-banner').hidden=true;$('#privacy-settings').hidden=true;
   const notice=document.createElement('div');notice.className='demo-notice';notice.textContent='VISTA PREVIA DE DISEÑO · No recibe reservas ni registra datos';document.body.prepend(notice);
@@ -120,7 +148,7 @@ for (const link of document.querySelectorAll('[data-whatsapp]')) {
   const texts = {
     viernes: 'Hola, vi Viernes Chelero en la web de Bering Bou: 2 Pilsen por S/15 hasta medianoche. Quiero consultar las condiciones para este viernes.',
     cumple: 'Hola, vi los cumpleaños en la web de Bering Bou. Quiero celebrar el [fecha] con [cantidad] personas. ¿Qué beneficios y condiciones aplican?',
-    evento: 'Hola, vi Halloween con El Chombo en la web de Bering Bou. Quiero consultar entradas y boxes para el 31 de octubre.'
+    evento: 'Hola, vi la web de Bering Bou. Quiero conocer la programación y las condiciones de ingreso para el próximo sábado.'
   };
   link.href = 'https://wa.me/' + config.whatsapp + '?text=' + encodeURIComponent(texts[subject]);
   link.addEventListener('click', () => track('whatsapp_click', {section: subject === 'viernes' ? null : subject}));
