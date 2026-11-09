@@ -80,14 +80,9 @@ function nextWeekday(day) {
   date.setUTCDate(date.getUTCDate()+(day-date.getUTCDay()+7)%7);
   return date;
 }
-for(const [id,day] of [['friday-date',5]]) {
+for(const [id,day] of [['friday-date',5],['saturday-date',6]]) {
   const date=nextWeekday(day);
   $('#'+id).textContent=new Intl.DateTimeFormat('es-PE',{timeZone:'America/Lima',weekday:'long',day:'2-digit',month:'short'}).format(date).toUpperCase();
-}
-if(limaDate()>'2026-11-07') {
-  $('#saturday-date').textContent='FINALIZADO · SÁBADO, 07 NOV. 2026';
-  $('#saturday-announcement').textContent='Este evento ya finalizó. Consulta las próximas fechas.';
-  $('.saturday-card [data-whatsapp]').textContent='Consultar próximas fechas ↗';
 }
 const boxDate=$('#box-date');boxDate.min=limaDate();boxDate.value=limaDate(nextWeekday(5));
 function updateBoxInquiry() {
@@ -153,7 +148,7 @@ for (const link of document.querySelectorAll('[data-whatsapp]')) {
   const texts = {
     viernes: 'Hola, vi Viernes Chelero en la web de Bering Bou: 2 Pilsen por S/15 hasta medianoche. Quiero consultar las condiciones para este viernes.',
     cumple: 'Hola, vi los cumpleaños en la web de Bering Bou. Quiero celebrar el [fecha] con [cantidad] personas. ¿Qué beneficios y condiciones aplican?',
-    evento: limaDate()<='2026-11-07' ? 'Hola, vi en la web de Bering Bou el evento de Kike Mouse: Halloween, Los cuentos de la cripta parte 2, del sábado 7 de noviembre de 2026. Quiero consultar condiciones de ingreso, boxes y premio al mejor disfraz.' : 'Hola, vi en la web de Bering Bou el evento pasado de Kike Mouse. Quiero conocer las próximas fechas y condiciones de ingreso.'
+    evento: 'Hola, vi la web de Bering Bou. Quiero conocer la programación y las condiciones de ingreso para el próximo sábado.'
   };
   link.href = 'https://wa.me/' + config.whatsapp + '?text=' + encodeURIComponent(texts[subject]);
   link.addEventListener('click', () => track('whatsapp_click', {section: subject === 'viernes' ? null : subject}));
