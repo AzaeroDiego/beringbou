@@ -1,0 +1,21 @@
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at top right,#302047,transparent 64%),#100d16;color:#fff4ff;font:16px/1.55 system-ui,sans-serif}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px max(5vw,calc((100vw - 700px)/2));border-bottom:1px solid #5b416d}
+header a{color:inherit;text-decoration:none;display:flex;align-items:center;gap:8px;font-weight:800}
+header span,.eyebrow,.date-label{font-size:.76rem;letter-spacing:.14em;font-weight:750;color:#f0b9ff}
+main{width:min(90%,560px);margin:0 auto;padding:40px 0 60px}
+h1{font-size:clamp(3.2rem,13vw,6rem);line-height:.9;letter-spacing:-.075em;margin:.12em 0 .25em}
+h1 em{font-style:normal;color:#f0b9ff}
+.date-label,.notice{border:1px solid #89619c;background:#271934;padding:12px}
+time{display:block;color:white;font-size:1.05rem;letter-spacing:0}
+form{display:grid;gap:8px}
+input:not([type=checkbox]){width:100%;min-width:0;min-height:46px;padding:9px 12px;border:1px solid #936ca6;background:#1d1629;color:white;font:inherit;color-scheme:dark}
+.check{display:flex;align-items:flex-start;gap:8px;font-size:.9rem;margin:10px 0}
+.check input{margin-top:5px;accent-color:#eeb1ff}
+button,.button{display:inline-block;min-height:46px;padding:10px 15px;border:1px solid transparent;background:#f0b9ff;color:#1d1026;font:inherit;font-weight:800;text-decoration:none;cursor:pointer}
+button:disabled{opacity:.55;cursor:default}
+.secondary{background:transparent;border-color:#ad82bd;color:#fff4ff}
+:focus-visible{outline:2px solid #fff;outline-offset:3px}
+canvas{display:block;width:min(100%,300px);height:auto;margin:16px 0}
+.actions{display:flex;flex-wrap:wrap;gap:10px}
+[hidden]{display:none!important}

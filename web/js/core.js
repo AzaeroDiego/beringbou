@@ -3,6 +3,11 @@ export const boxType = id => [1, 2, 6, 7].includes(Number(id)) ? 'black' : 'red'
 export function limaDate(date = new Date()) {
   return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Lima', year: 'numeric', month: '2-digit', day: '2-digit' }).format(date);
 }
+export function nextSaturday(date = new Date()) {
+  const day = new Date(limaDate(date) + 'T12:00:00Z');
+  day.setUTCDate(day.getUTCDate() + (6 - day.getUTCDay()));
+  return day.toISOString().slice(0, 10);
+}
 export function sourceFrom(referrer = '', search = '') {
   const utm = new URLSearchParams(search).get('utm_source')?.toLowerCase();
   const known = { fb: 'facebook', facebook: 'facebook', ig: 'instagram', instagram: 'instagram', wa: 'whatsapp', whatsapp: 'whatsapp', google: 'google' };

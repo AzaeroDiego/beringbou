@@ -44,3 +44,14 @@ test('UUID compatible con vistas HTTP conserva versión y variante',async()=>{
  const id=newId({getRandomValues:array=>array.fill(255)});
  assert.match(id,/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
 });
+
+test('el QR usa el sábado actual o próximo en hora de Lima', async () => {
+  const { nextSaturday } = await import('../web/js/core.js');
+  for (const [instant, expected] of [
+    ['2026-11-09T18:00:00Z', '2026-11-14'],
+    ['2026-11-14T05:00:00Z', '2026-11-14'],
+    ['2026-11-15T04:59:59Z', '2026-11-14'],
+    ['2026-11-15T05:00:00Z', '2026-11-21'],
+    ['2026-12-27T18:00:00Z', '2027-01-02']
+  ]) assert.equal(nextSaturday(new Date(instant)), expected);
+});

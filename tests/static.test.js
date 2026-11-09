@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFile,access} from 'node:fs/promises';
 import path from 'node:path';
 const root=path.resolve('web');
-for(const file of ['index.html','cumple/index.html','admin/index.html'])test('recursos relativos de '+file,async()=>{
+for(const file of ['index.html','cumple/index.html','admin/index.html','qr/index.html'])test('recursos relativos de '+file,async()=>{
  const html=await readFile(path.join(root,file),'utf8');
  for(const match of html.matchAll(/(?:src|href)="(\.[^"#?]+)"/g))await access(path.resolve(root,path.dirname(file),match[1]));
  assert.match(html,/name="viewport"/);

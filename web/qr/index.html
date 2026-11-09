@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Genera tu QR de invitado para el sábado en Bering Bou.">
+  <title>QR de invitado · Bering Bou</title>
+  <link rel="stylesheet" href="./qr.css">
+  <script type="module" src="../js/guest-qr.js"></script>
+</head>
+<body>
+  <header>
+    <a href="../" aria-label="Bering Bou, volver al inicio"><img src="../assets/bering-monogram.svg" width="42" height="31" alt=""> BERING BOU</a>
+    <span>HUAYCÁN / LIMA</span>
+  </header>
+  <main>
+    <p class="eyebrow">LISTA DE INVITADOS · +18</p>
+    <h1>Tu sábado.<br><em>Tu QR.</em></h1>
+    <p>Completa tus datos y guarda el QR de invitado para el sábado indicado.</p>
+    <p id="demo-note" class="notice" hidden>Modo demostración. Los datos quedan en este navegador mientras la página está abierta y el QR es de prueba.</p>
+    <p class="date-label">FECHA DEL EVENTO <time id="event-date">Cargando…</time></p>
+    <form id="guest-form">
+      <label for="name">Nombres y apellidos</label>
+      <input id="name" name="name" autocomplete="name" maxlength="80" required>
+      <label for="birth">Fecha de nacimiento</label>
+      <input id="birth" name="birth" type="date" autocomplete="bday" required>
+      <label for="phone">Celular</label>
+      <input id="phone" name="phone" type="tel" inputmode="numeric" autocomplete="tel-national" pattern="9[0-9]{8}" maxlength="9" placeholder="9XXXXXXXX" required>
+      <label class="check"><input name="privacy" type="checkbox" required><span>Acepto que Bering Bou use mis datos para registrar mi invitación y verificar que soy mayor de edad.</span></label>
+      <button id="submit" type="submit" disabled>Generar mi QR ↗</button>
+    </form>
+    <p id="status" role="status"></p>
+    <section id="result" hidden>
+      <h2 id="result-title" tabindex="-1">Tu QR está listo</h2>
+      <p id="result-date"></p>
+      <canvas id="code" aria-label="Código QR de invitado" role="img"></canvas>
+      <div class="actions"><a id="download" class="button" download>Descargar QR en PNG ↓</a><button id="reset" class="secondary" type="button">Generar otro QR</button></div>
+    </section>
+    <noscript>Activa JavaScript para generar tu código QR.</noscript>
+  </main>
+</body>
+</html>
