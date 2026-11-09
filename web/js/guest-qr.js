@@ -92,7 +92,7 @@ form.addEventListener('submit', async event => {
     status.textContent = 'Debes tener al menos 18 años para generar el QR.';
     return;
   }
-  const details = { p_name: name, p_birth_date: birth, p_phone: fields.get('phone'), p_dni: fields.get('dni'), p_expected_date: date, p_consent: fields.has('privacy') };
+  const details = { p_name: name, p_birth_date: birth, p_phone: fields.get('phone'), p_dni: fields.get('dni'), p_expected_date: date, p_consent: true };
   const fingerprint = JSON.stringify(details);
   if (pending?.fingerprint !== fingerprint) pending = { fingerprint, id: newId() };
   $('submit').disabled = true;

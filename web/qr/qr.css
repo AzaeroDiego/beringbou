@@ -10,8 +10,7 @@ h1 em{font-style:normal;color:#f0b9ff}
 time{display:block;color:white;font-size:1.05rem;letter-spacing:0}
 form{display:grid;gap:8px}
 input:not([type=checkbox]){width:100%;min-width:0;min-height:46px;padding:9px 12px;border:1px solid #936ca6;background:#1d1629;color:white;font:inherit;color-scheme:dark}
-.check{display:flex;align-items:flex-start;gap:8px;font-size:.9rem;margin:10px 0}
-.check input{margin-top:5px;accent-color:#eeb1ff}
+.form-note{margin:8px 0;font-size:.82rem;color:#dbcbdf}
 button,.button{display:inline-block;min-height:46px;padding:10px 15px;border:1px solid transparent;background:#f0b9ff;color:#1d1026;font:inherit;font-weight:800;text-decoration:none;cursor:pointer}
 button:disabled{opacity:.55;cursor:default}
 .secondary{background:transparent;border-color:#ad82bd;color:#fff4ff}

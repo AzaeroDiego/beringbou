@@ -103,7 +103,7 @@ function setupForm(form,kind) {
   form.addEventListener('submit',async event=>{
     event.preventDefault();if(sending)return;const values=new FormData(form);const message=form.querySelector('.form-message');message.classList.remove('error');
     if(values.get('website'))return;
-    const data={kind,name:String(values.get('name')||'').trim(),phone:String(values.get('phone')||'').trim(),date:kind==='box'?config.event.date:String(values.get('date')),guests:Number(values.get('guests')),privacy:values.get('privacy')==='on',box_id:kind==='box'?selected:null,event_slug:kind==='box'?config.event.slug:null};
+    const data={kind,name:String(values.get('name')||'').trim(),phone:String(values.get('phone')||'').trim(),date:kind==='box'?config.event.date:String(values.get('date')),guests:Number(values.get('guests')),privacy:true,box_id:kind==='box'?selected:null,event_slug:kind==='box'?config.event.slug:null};
     if(kind==='box' && config.boxInquiryOnly){message.textContent='Consulta el paquete vigente por WhatsApp desde el plano de boxes.';return;}
     const invalid=validateRequest(data);if(invalid){message.textContent=invalid;message.classList.add('error');return;}
     if(config.demo){
