@@ -84,6 +84,8 @@ for(const [id,day] of [['friday-date',5],['saturday-date',6]]) {
   const date=nextWeekday(day);
   $('#'+id).textContent=new Intl.DateTimeFormat('es-PE',{timeZone:'America/Lima',weekday:'long',day:'2-digit',month:'short'}).format(date).toUpperCase();
 }
+const featuredEvent = document.querySelector('[data-featured-until]');
+if (featuredEvent && featuredEvent.dataset.featuredUntil < limaDate()) featuredEvent.hidden = true;
 const boxDate=$('#box-date');boxDate.min=limaDate();boxDate.value=limaDate(nextWeekday(5));
 function updateBoxInquiry() {
   const link=$('#request-box');
