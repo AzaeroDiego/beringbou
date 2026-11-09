@@ -16,9 +16,15 @@ async function request(path, { method = 'POST', body, token } = {}) {
     const text = await response.text(); let result; try { result = text ? JSON.parse(text) : null; } catch { result = null; }
     if (!response.ok) {
       const code = result?.code;
+      if (result?.message === 'guest_duplicate') {
+        throw Object.assign(new Error('Ya existe un QR con alguno de estos datos para este sábado. Si es tuyo, recupéralo desde este navegador o escribe al local.'), { code: 'guest_duplicate' });
+      }
+      if (result?.message === 'guest_receipt_missing') throw new Error('No se encontró un QR vigente con esta referencia.');
+      if (result?.message === 'guest_invalid_event_date') throw new Error('Elige una fecha de sábado.');
+
       if (result?.message === 'guest_underage') throw new Error('Debes tener al menos 18 años para generar el QR.');
       if (result?.message === 'guest_date_changed') throw new Error('Cambió el sábado de registro. Revisa la fecha y vuelve a pulsar Generar mi QR.');
-      if (result?.message === 'guest_invalid_data') throw new Error('Revisa tus nombres, fecha de nacimiento y celular.');
+      if (result?.message === 'guest_invalid_data') throw new Error('Revisa tus nombres, DNI, fecha de nacimiento y celular.');
       if (code === '23505') throw new Error('Ese box ya tiene una reserva confirmada para el evento.');
       if (result?.message === 'rate_limit') throw new Error('Has enviado varias solicitudes. Inténtalo más tarde.');
       if (response.status === 401 || response.status === 403 || result?.message === 'not_authorized') throw new Error('No tienes acceso o tu sesión venció. Vuelve a iniciar sesión.');

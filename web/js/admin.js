@@ -1,3 +1,4 @@
+import { loadGuestQrs, clearGuestQrs } from './admin-guest-qr.js';
 import { config } from '../config.js';
 import { configured, rpc, signIn, signOut, hasSession } from './api.js';
 import { limaDate, csvCell, funnel } from './core.js';
@@ -23,8 +24,8 @@ async function load(){
  try{const data=await rpc('bering_dashboard',{p_from:from,p_to:to},true);metrics=data;render(data);$('#dashboard').hidden=false;$('#login-form').hidden=true;$('#logout').hidden=false;message('Datos actualizados. Periodo en hora de Lima.');}
  catch(error){metrics=null;$('#dashboard').hidden=true;$('#login-form').hidden=false;$('#logout').hidden=!hasSession();message(error.message+' Si tu cuenta es nueva, el administrador debe autorizar tu UID.');}
 }
-$('#login-form').addEventListener('submit',async event=>{event.preventDefault();const button=event.target.querySelector('button');button.disabled=true;message('Comprobando acceso…');try{await signIn($('#email').value.trim(),$('#password').value);$('#password').value='';await load();}catch(error){message(error.message);}finally{button.disabled=false;}});
-$('#logout').addEventListener('click',async()=>{try{await signOut();}catch{}metrics=null;$('#dashboard').hidden=true;$('#login-form').hidden=false;$('#logout').hidden=true;message('Sesión cerrada.');});
+$('#login-form').addEventListener('submit',async event=>{event.preventDefault();const button=event.target.querySelector('button');button.disabled=true;message('Comprobando acceso…');try{await signIn($('#email').value.trim(),$('#password').value);$('#password').value='';await load();if (!$('#dashboard').hidden) loadGuestQrs();}catch(error){message(error.message);}finally{button.disabled=false;}});
+$('#logout').addEventListener('click',async()=>{try{await signOut();}catch{}metrics=null;clearGuestQrs();$('#dashboard').hidden=true;$('#login-form').hidden=false;$('#logout').hidden=true;message('Sesión cerrada.');});
 $('#range-form').addEventListener('submit',event=>{event.preventDefault();load();});
 $('#export').addEventListener('click',()=>{if(!metrics)return;const rows=[['grupo','métrica','cantidad'],...['visits','sessions','requests','confirmed'].map(key=>['resumen',key,metrics[key]]),...metrics.events.map(row=>['eventos',row.name,row.total]),...metrics.sources.map(row=>['origen',row.source,row.visits]),...metrics.boxes.map(row=>['boxes',row.box_id,row.clicks]),...metrics.days.map(row=>['dia',row.day,row.visits]),...metrics.campaigns.map(row=>['campaña',row.campaign,row.visits])];const csv='\uFEFF'+rows.map(row=>row.map(csvCell).join(',')).join('\r\n');const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download='bering-metricas-'+$('#from').value+'-'+$('#to').value+'.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
-if(!configured){message(config.demo?'Esta vista previa no habilita el panel ni recopila datos.':'Supabase aún no está configurado. No se muestran métricas de demostración.');$('#login-form button').disabled=true;}else if(hasSession())load();
+if(!configured){message(config.demo?'Esta vista previa no habilita el panel ni recopila datos.':'Supabase aún no está configurado. No se muestran métricas de demostración.');$('#login-form button').disabled=true;}else if(hasSession())load().then(() => { if (!$('#dashboard').hidden) loadGuestQrs(); });
