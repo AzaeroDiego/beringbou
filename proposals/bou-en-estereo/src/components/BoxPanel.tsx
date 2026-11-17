@@ -1,0 +1,25 @@
+'use client';
+import {useState,useSyncExternalStore} from 'react';
+import {Arrow} from './Visuals';
+import {boxKind,boxMessage,boxOffer,strongDates,validBoxDate} from '@/data/boxes';
+import {wa} from '@/data/site';
+const subscribe=(update:()=>void)=>{const timer=setInterval(update,60000);return()=>clearInterval(timer);};
+const limaToday=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'America/Lima',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+const empty=()=>'';
+const positions=['Cerca del escenario','Segunda fila','Tercera fila','Cuarta fila','Cerca de barra VIP'];
+export function BoxPanel(){
+ const today=useSyncExternalStore(subscribe,limaToday,empty);
+ const [date,setDate]=useState('2026-11-21');
+ const [selected,setSelected]=useState(1);
+ const offer=boxOffer(date,selected);
+ const valid=validBoxDate(date,today||'2026-11-16');
+ const firstStrong=Object.keys(strongDates).find(day=>day>=(today||'2026-11-16'));
+ function changeDate(value:string){setDate(value);}
+ return <section id="boxes" className="section wrap box-section" aria-labelledby="box-heading">
+  <div className="section-head"><h2 id="box-heading">Separa tu box.<br/><span className="outline-type">Hazlo tuyo.</span></h2><p>Tu fecha. Tu zona.<br/>El plan empieza aquí.</p></div>
+  <div className="box-date-panel"><div className="field"><label htmlFor="box-date">¿Qué fecha tienes en mente?</label><input id="box-date" type="date" value={date} min={today||undefined} aria-describedby="box-date-note" onChange={e=>changeDate(e.target.value)}/></div>{firstStrong&&<button type="button" className="date-shortcut" aria-pressed={date===firstStrong} onClick={()=>changeDate(firstStrong)}>{new Intl.DateTimeFormat('es-PE',{timeZone:'UTC',day:'numeric',month:'short'}).format(new Date(firstStrong+'T12:00:00Z'))} · {strongDates[firstStrong].title} <Arrow/></button>}<p id="box-date-note" className="fine">Las tarifas especiales se muestran solo en fechas confirmadas. En las demás, precios a consultar.</p></div>
+  <div className="interactive-box-layout"><div className="box-map"><div className="map-caption"><span>Elige un box del plano</span><span>10 boxes</span></div><div className="box-stage">ESCENARIO</div><div className="box-floor"><div className="map-box-column">{[1,2,3,4,5].map(id=><button type="button" key={id} data-box-id={id} className={`map-box map-${boxKind(id)}`} aria-label={`Elegir box ${String(id).padStart(2,'0')} ${boxKind(id)==='black'?'Black':'Red'}`} aria-pressed={selected===id} onClick={()=>setSelected(id)}><strong>{String(id).padStart(2,'0')}</strong>{' '}<span>{boxKind(id)==='black'?'BLACK':'RED'}</span></button>)}</div><div className="box-dance" aria-hidden="true"><strong>BB</strong><span>ZONA<br/>GENERAL</span><i>↓</i></div><div className="map-box-column">{[6,7,8,9,10].map(id=><button type="button" key={id} data-box-id={id} className={`map-box map-${boxKind(id)}`} aria-label={`Elegir box ${String(id).padStart(2,'0')} ${boxKind(id)==='black'?'Black':'Red'}`} aria-pressed={selected===id} onClick={()=>setSelected(id)}><strong>{String(id).padStart(2,'0')}</strong>{' '}<span>{boxKind(id)==='black'?'BLACK':'RED'}</span></button>)}</div></div><div className="box-bar">BARRA VIP <span>SEGUNDO NIVEL</span></div><div className="box-legend"><span><i className="black-swatch"/>Black</span><span><i className="red-swatch"/>Red</span><span><i className="selected-swatch"/>Tu selección</span></div><p className="fine">Plano de referencia, no a escala. Los colores distinguen zonas y tu selección; la disponibilidad se confirma con el local.</p></div>
+   <div className="box-choice" aria-live="polite" aria-atomic="true"><span className="section-label">{selected<=5?'Lado izquierdo':'Lado derecho'} · {positions[(selected-1)%5]}</span><h3>BOX <span className="yellow">{String(selected).padStart(2,'0')}</span></h3><div className="box-price-line"><span>{offer.name}</span><strong data-box-price>{valid?(offer.price===null?'Precios a consultar':`S/${offer.price}`):'Elige una fecha válida'}</strong></div><p className="box-date-label">{valid&&offer.event?offer.event:valid?'Arma tu plan para esta fecha.':'Elige una fecha desde hoy para continuar.'}</p>{valid&&offer.price!==null?<><span className="tag">Tarifa de fecha fuerte</span><ul className="box-includes"><li>1 botella {offer.bottle}</li><li>2 guaranás</li><li>Hielo ilimitado</li><li>4 pulseras VIP</li></ul></>:<ul className="box-includes"><li>Consulta el precio de tu fecha.</li><li>Coordina las bebidas de tu paquete.</li><li>Confirma los accesos para tu grupo.</li></ul>}<p className="fine">Capacidad de asientos, invitados adicionales y adelanto por confirmar. La consulta no bloquea el box.</p>{valid?<a className="button box-inquiry" href={wa(boxMessage(date,selected))} target="_blank" rel="noopener noreferrer">Consultar y separar este box <Arrow/></a>:<button className="button" type="button" disabled>Elige una fecha para continuar</button>}<p className="fine box-confirmation-note">La reserva queda confirmada cuando el local valide disponibilidad y condiciones contigo por WhatsApp.</p></div>
+  </div>
+ </section>;
+}

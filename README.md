@@ -1,5 +1,13 @@
 # Bering Bou · web + Supabase
 
+## Producción · Bou en estéreo (17 de noviembre de 2026)
+
+La compilación por defecto publica la propuesta Next.js de `proposals/bou-en-estereo` como sitio estático y conserva los accesos operativos `/qr/`, `/admin/` y `/cumple/`. Incluye fotos y video facilitados por el propietario, reservas por WhatsApp y un plano interactivo de diez boxes. Solo el 21 de noviembre (ERROR) muestra las tarifas de Halloween autorizadas por el propietario: Black S/320 y Red S/270. Las demás fechas muestran «Precios a consultar». No se simula disponibilidad ni se confirma una reserva desde el plano.
+
+Compilar con Node 22.16 o superior: `npm run build`. El proceso instala las dependencias de la propuesta cuando faltan o en CI y genera únicamente `dist/`. Mantener el comando de alojamiento `npm run build`, raíz del repositorio y salida `dist`. La alternativa `--demo` conserva la demostración histórica de GitHub Pages.
+
+Validación y reversión: [docs/RELEASE-2026-11-17.md](docs/RELEASE-2026-11-17.md). Las secciones históricas siguientes describen las etapas anteriores y el backend conservado.
+
 Repositorio público limpio de la nueva web; no contiene archivos ni historial del sistema antiguo. Diseño adaptado al video de Diego: fondo navy, cian/fucsia, botones amarillos redondeados, portada inmersiva, cuenta regresiva y reserva en tres pasos. Incluye el evento real del flyer, plano de diez boxes y sección de cumpleaños.
 
 ## Etapa 1 · programación permanente (3 de noviembre de 2026)
@@ -12,7 +20,7 @@ GitHub Pages continúa como demostración sin formularios reales ni analítica; 
 
 ## Ejecutar y compilar
 
-Requiere Node 20 o superior. Sin dependencias de npm.
+Requiere Node 22.16 o superior. Las dependencias de la propuesta se instalan durante la compilación.
 
 ```sh
 npm test
@@ -75,7 +83,7 @@ Ejemplo de enlace de campaña: `https://beringbou.com/?utm_source=facebook&utm_c
 
 ## Publicación posterior en beringbou.com
 
-El dominio no se ha cambiado ni se ha reemplazado la web actual.
+La publicación de esta versión fue autorizada por el propietario. La compilación normal genera el nuevo sitio; `--demo` conserva la demostración histórica. No se requieren cambios de DNS.
 
 ### GitHub Pages: demostración visual
 

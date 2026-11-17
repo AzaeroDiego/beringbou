@@ -139,7 +139,7 @@ if(config.demo){
   $('#consent-banner').hidden=true;$('#privacy-settings').hidden=true;
   const notice=document.createElement('div');notice.className='demo-notice';notice.textContent='VISTA PREVIA DE DISEÑO · No recibe reservas ni registra datos';document.body.prepend(notice);
   document.querySelector('a[href$="admin/"]').hidden=true;
-}else initAnalytics();
+}else initAnalytics({eventSlug:null});
 refreshAvailability();
 if(location.pathname.includes('/cumple'))requestAnimationFrame(()=>$('#cumple').scrollIntoView());
 

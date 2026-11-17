@@ -1,2 +1,4 @@
 import type {MetadataRoute} from 'next';
-export default function robots():MetadataRoute.Robots{return {rules:{userAgent:'*',disallow:'/'},sitemap:'http://127.0.0.1:4400/sitemap.xml'}}
+import {site} from '@/data/site';
+export const dynamic='force-static';
+export default function robots():MetadataRoute.Robots{return {rules:site.production?{userAgent:'*',allow:'/',disallow:['/admin/','/qr/','/conceptos/','/entradas/']}:{userAgent:'*',disallow:'/'},sitemap:site.url+'/sitemap.xml'}}

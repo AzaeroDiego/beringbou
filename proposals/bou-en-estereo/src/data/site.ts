@@ -1,6 +1,7 @@
 // No invented commercial facts. Missing media/catalogue and future sales are explicitly marked.
 export const site = {
-  name: 'Bering Bou', url: 'http://127.0.0.1:4400',
+  name: 'Bering Bou', url: process.env.NEXT_PUBLIC_SITE_URL || 'http://127.0.0.1:4400',
+  production: process.env.NEXT_PUBLIC_SITE_MODE === 'production',
   description: 'La noche empieza con tu gente. Descubre Bering Bou en Huaycán, consulta su agenda y coordina tu próxima salida por WhatsApp.',
   whatsapp: '51930776652',
   address: 'Av. 15 de Julio · Zona A · Lote 29',

@@ -1,0 +1,7 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {boxKind,boxOffer,boxMessage,validBoxDate} from '../src/data/boxes.ts';
+test('el plano conserva cuatro Black y seis Red del flyer',()=>{assert.deepEqual(Array.from({length:10},(_,i)=>i+1).filter(id=>boxKind(id)==='black'),[1,2,6,7]);assert.throws(()=>boxKind(0));assert.throws(()=>boxKind(11));});
+test('solo la fecha confirmada de ERROR ofrece los precios autorizados',()=>{assert.equal(boxOffer('2026-11-21',1).price,320);assert.equal(boxOffer('2026-11-21',3).price,270);assert.equal(boxOffer('2026-11-21',10).bottle,'Red Label');for(const date of ['2026-11-20','2026-11-22','2026-11-28','2027-01-01']){assert.equal(boxOffer(date,1).price,null);assert.equal(boxOffer(date,3).bottle,null);}});
+test('fechas pasadas, vacías e inexistentes no generan una consulta válida',()=>{for(const date of ['','2026-11-15','2026-02-30','2026-13-01','not-a-date'])assert.equal(validBoxDate(date,'2026-11-16'),false);assert.equal(validBoxDate('2026-11-16','2026-11-16'),true);assert.equal(validBoxDate('2026-11-21','2026-11-22'),false);});
+test('el mensaje conserva exactamente fecha, box, tipo y tarifa de la selección',()=>{const special=boxMessage('2026-11-21',7);assert.match(special,/box 07 \(Box Black\)/);assert.match(special,/2026-11-21/);assert.match(special,/S\/320/);assert.match(special,/ERROR/);const ordinary=boxMessage('2026-11-28',3);assert.match(ordinary,/Precios a consultar/);assert.doesNotMatch(ordinary,/270|320|ERROR/);});

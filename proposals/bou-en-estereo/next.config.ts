@@ -1,9 +1,3 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
-  /* config options here */
-  cacheComponents: true,
-  partialPrefetching: true,
-};
-
+import type {NextConfig} from 'next';
+const nextConfig:NextConfig={output:'export',trailingSlash:true,images:{unoptimized:true}};
 export default nextConfig;

@@ -3,6 +3,7 @@ import { configured, rpc } from './api.js';
 import { sourceFrom, campaignFrom, newId } from './core.js';
 let enabled = false; let sessionId; let attribution; let observer; let pageTracked = false;
 const seen = new Set(); const pending = new Map(); let flushing = false;
+let analyticsEventSlug = config.event.slug;
 const consentKey = 'bering.analytics.consent.v1';
 export const consent = () => { try { return localStorage.getItem(consentKey); } catch { return null; } };
 export function functionalSession() {
@@ -12,7 +13,7 @@ export async function track(name, detail = {}) {
   if (!enabled || !configured || !sessionId) return;
   const allowed = ['page_view','section_view','box_select','form_start','request_submitted','whatsapp_click','scroll_depth'];
   if (!allowed.includes(name)) return;
-  const item = { id: newId(), session_id: sessionId, name, page: location.pathname.includes('/cumple') ? '/cumple/' : '/', source: attribution.source, campaign: attribution.campaign, event_slug: config.event.slug, section: detail.section || null, box_id: detail.box_id || null, depth: detail.depth || null };
+  const item = { id: newId(), session_id: sessionId, name, page: location.pathname.includes('/cumple') ? '/cumple/' : '/', source: attribution.source, campaign: attribution.campaign, event_slug: analyticsEventSlug, section: detail.section || null, box_id: detail.box_id || null, depth: detail.depth || null };
   if (pending.size < 100) pending.set(item.id, item);
   await flush();
 }
@@ -28,13 +29,14 @@ function start() {
   if (!attribution) { attribution = {source:sourceFrom(document.referrer,location.search),campaign:campaignFrom(location.search)}; try { sessionStorage.setItem('bering.analytics.attribution',JSON.stringify(attribution)); } catch {} }
   if (!pageTracked) { pageTracked = true; track('page_view'); }
   observer = new IntersectionObserver(entries => entries.forEach(entry => {
-    const id = entry.target.id; if (!['inicio','evento','boxes','cumple','visitanos'].includes(id)) return; if (entry.isIntersecting && !seen.has(id)) { seen.add(id); track('section_view', { section: id }); }
+    const id = entry.target.dataset.analyticsSection || entry.target.id; if (!['inicio','evento','boxes','cumple','visitanos'].includes(id)) return; if (entry.isIntersecting && !seen.has(id)) { seen.add(id); track('section_view', { section: id }); }
   }), { threshold: 0.2 });
   document.querySelectorAll('main section[id]').forEach(section => observer.observe(section));
 }
 function stop() { enabled = false; observer?.disconnect(); pending.clear(); sessionId = null; attribution = null; pageTracked = false; seen.clear(); try { sessionStorage.removeItem('bering.analytics.session'); sessionStorage.removeItem('bering.analytics.attribution'); } catch {} }
 export function setConsent(value) { try { localStorage.setItem(consentKey, value); } catch {} if (value === 'accepted') start(); else stop(); }
-export function initAnalytics() {
+export function initAnalytics(options = {}) {
+  if (Object.prototype.hasOwnProperty.call(options, 'eventSlug')) analyticsEventSlug = options.eventSlug;
   if (consent() === 'accepted') start();
   const banner = document.getElementById('consent-banner'); banner.hidden = consent() !== null;
   document.querySelectorAll('[data-consent]').forEach(button => button.addEventListener('click', () => { setConsent(button.dataset.consent); banner.hidden = true; }));
