@@ -54,10 +54,11 @@ for(const [name,engine,options]of [['chromium',chromium,{channel:'msedge'}],['we
  await page.goto(base+'/admin/');assert.ok(await page.locator('#login-form').isVisible());assert.ok(await page.locator('#dashboard').isHidden());
  await page.goto(base+'/missing-test');assert.match(await page.title(),/Página no encontrada/);
  const measurements=requests.filter(r=>r.url.includes('bering_track_event'));assert.ok(measurements.length>0,'Consented measurements should be wired');for(const m of measurements){assert.equal(m.body.p_event.event_slug,null);assert.ok(!JSON.stringify(m.body).includes('Prueba local'));assert.ok(!JSON.stringify(m.body).includes('999999999'));}
- const expectedProbe=blocked.filter(s=>/script.*inline|inline.*script/i.test(s));
+ // The host injects an optional telemetry beacon. Keep it blocked by the existing consent policy.
+ const expectedProbe=blocked.filter(s=>/script.*inline|inline.*script/i.test(s)||s.includes('https://static.cloudflareinsights.com/beacon.min.js/'));
  assert.deepEqual(errors,[],name+' runtime errors');assert.deepEqual(badResources,[],name+' missing resources');
  assert.deepEqual(serious,[],name+' serious accessibility findings');assert.deepEqual(blocked.filter(s=>!expectedProbe.includes(s)),[],name+' unexpected CSP blocks');
- results.push({engine:name,viewports:11,fieldsOverlap:false,allBoxPrices:true,ordinaryPriceIsNull:true,invalidDateBlocked:true,whatsappSelection:true,menuEscape:true,lightbox:true,qrFlow:'mocked-no-real-write',birthdayFlow:'mocked-no-real-write',adminGate:true,nextNavigation:true,a11ySerious:serious.length,runtimeErrors:errors,missingResources:badResources,cspBlocked:blocked.filter(s=>!expectedProbe.includes(s)),consentedAnalytics:measurements.length});
+ results.push({engine:name,viewports:11,fieldsOverlap:false,allBoxPrices:true,ordinaryPriceIsNull:true,invalidDateBlocked:true,whatsappSelection:true,menuEscape:true,lightbox:true,qrFlow:'mocked-no-real-write',birthdayFlow:'mocked-no-real-write',adminGate:true,nextNavigation:true,a11ySerious:serious.length,runtimeErrors:errors,missingResources:badResources,cspBlocked:blocked.filter(s=>!expectedProbe.includes(s)),blockedHostTelemetry:blocked.filter(s=>s.includes('https://static.cloudflareinsights.com/beacon.min.js/')).length,consentedAnalytics:measurements.length});
  await browser.close();console.log(name,'passed');
 }
 fs.writeFileSync(path.join(output,'functional-report.json'),JSON.stringify(results,null,2));console.log(JSON.stringify(results,null,2));
