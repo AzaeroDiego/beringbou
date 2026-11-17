@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 76 56">
+  <defs>
+    <linearGradient id="light" x2="1" y2="1" gradientUnits="objectBoundingBox">
+      <stop stop-color="#fff"/>
+      <stop offset="1" stop-color="#ead2ff"/>
+    </linearGradient>
+  </defs>
+  <style>
+    .mark{transform-origin:38px 28px}
+    .left,.right{transform-box:fill-box;transform-origin:center}
+    @media (prefers-reduced-motion:no-preference){
+      .mark{animation:saludo 1.4s ease-in-out 1}
+      .left{animation:izquierda 1.4s ease-in-out 1}
+      .right{animation:derecha 1.4s ease-in-out 1}
+    }
+    @keyframes saludo{0%,100%{transform:scale(1)} 42%{transform:scale(1.09)} 67%{transform:scale(.99)}}
+    @keyframes izquierda{0%,100%{transform:none} 42%{transform:translateX(-1.4px) rotate(-4deg)}}
+    @keyframes derecha{0%,100%{transform:none} 42%{transform:translateX(1.4px) rotate(4deg)}}
+  </style>
+  <g class="mark" fill="url(#light)">
+    <path class="left" d="M4 4H18C27 4 32 8 32 14C32 18.5 29.2 22 25.9 23.7C30 24.2 33.4 25.4 36 27.5C34.8 29 34 30.7 33.5 32C31 27.5 27.3 25.6 22.5 24.7C17.6 23.8 14.6 21.8 13.1 18.3V51.7H18V53H4V51.7H8V5.3H4ZM13.1 5.3V16.5C15 20.4 18.7 22.9 22.3 23.3C25.7 22.1 27.1 18.5 27.1 14.2C27.1 8.7 24 5.3 17.7 5.3ZM42.1 43.8C44.2 48.5 47.2 51.7 53.8 51.7H63V53H53.5C47.4 53 43.2 52 39.6 49C40.7 47.4 41.5 45.7 42.1 43.8Z"/>
+    <path class="right" d="M72 4H58C49 4 44 8 44 14C44 18.6 46.9 22 50.2 23.7C41.3 25 36.3 30.3 35.8 39.4C35.3 47.5 31.1 51.7 24 51.7H13V53H24.3C35.4 53 40.5 48.2 41 39.5C41.5 30.4 45.5 26.4 53.5 24.7C58.4 23.7 61.5 21.7 62.9 18.3V51.7H58V53H72V51.7H68V5.3H72ZM62.9 5.3V16.5C61 20.4 57.3 22.9 53.7 23.3C50.3 22.1 48.9 18.5 48.9 14.2C48.9 8.7 52 5.3 58.3 5.3Z"/>
+  </g>
+</svg>

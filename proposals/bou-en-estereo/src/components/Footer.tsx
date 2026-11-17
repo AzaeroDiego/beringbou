@@ -1,0 +1,3 @@
+import Link from 'next/link';
+import {site,wa} from '@/data/site';
+export function Footer(){return <footer className="wrap site-footer"><div className="footer-top"><p>El grupo ya está.<br/>Falta la noche.</p><a className="text-link" href={wa()} target="_blank" rel="noopener noreferrer">Hablemos por WhatsApp <span className="arrow" aria-hidden="true">↗</span></a></div><div className="footer-brand" aria-hidden="true">BERING BOU</div><div className="footer-meta"><span>Solo +18 · Consumo responsable</span><Link href="/conceptos">Ver los tres conceptos</Link><a href={site.source} target="_blank" rel="noopener noreferrer">Fuente del contenido ↗</a><span>Propuesta local · 2026</span></div></footer>}
